@@ -8535,26 +8535,24 @@
 		"outputPathIsSetByUser": 0,
 		"processed": 0
 		},
-	"\/src\/doc\/edge-src-medium.png": {
-		"fileType": 32768,
-		"ignore": 0,
+	"\/readme.html": {
+		"fileType": 8192,
+		"ignore": 1,
 		"ignoreWasSetByUser": 0,
-		"initialSize": 10386,
-		"inputAbbreviatedPath": "\/src\/doc\/edge-src-medium.png",
-		"outputAbbreviatedPath": "\/src\/doc\/edge-src-medium.png",
+		"inputAbbreviatedPath": "\/readme.html",
+		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0,
-		"processed": 0
+		"outputPathIsSetByUser": 0
 		},
-	"\/src\/doc\/readme.md": {
+	"\/README.md": {
 		"enableFootnoteSupport": 0,
 		"enableSmartyPants": 1,
 		"expandTabs": 1,
 		"fileType": 4096,
 		"ignore": 1,
 		"ignoreWasSetByUser": 1,
-		"inputAbbreviatedPath": "\/src\/doc\/readme.md",
-		"outputAbbreviatedPath": "\/src\/doc\/readme.html",
+		"inputAbbreviatedPath": "\/README.md",
+		"outputAbbreviatedPath": "\/README.html",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
