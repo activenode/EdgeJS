@@ -123,8 +123,24 @@ body {
   }
 
   #footer {
-    font-size:70%;
+    position: fixed; bottom: 0;
+    font-size:75%;
     color:#8b8f8f;
+    background:rgba(255,255,255,0.52); width:100%;
+    border-top:1px solid lighten(saturate(#8b8f8f, 10%), 9%);
+    box-shadow: 0 -2px 1px lighten(#b1adad,15%);
+
+    a {
+      font-weight:bold;
+      border-bottom: 1px dotted;
+      text-decoration: none;
+      color: darken(saturate(#8b8f8f, 7%), 5%);
+    }
+
+    > span {
+      display: block;
+      padding:0.8em 2em;
+    }
   }
 }
 
