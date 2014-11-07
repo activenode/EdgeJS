@@ -1,0 +1,174 @@
+@import 'definitions';
+
+@img_path: './img';
+body {
+  .efu-files {
+    position:absolute; top:0; left:0;
+    overflow:hidden;
+    width:10px; height:10px; //just initial stuff
+    .opac(0);
+    
+    > .efu-file-entry {
+      display:none;
+      
+      &:first-child {
+        display:block;
+      }
+    }
+    
+    input[type=file] {
+      font-size:50px; cursor:pointer;
+    }
+  }
+  
+  .edge-file-uploader {
+    @bgcol: #5c6768;
+    @height: 2.7em;
+    @textheight: @height - 8px;
+
+    line-height:@height;
+    @border-col: desaturate(darken(@bgcol, 5%),5%);
+    border:2px solid @border-col;
+    .bboxSizing();
+    width:100%;
+    height:@height;
+    background:rgba(
+            red(@bgcol),
+            green(@bgcol),
+            blue(@bgcol),
+            0.9
+    );
+    overflow:hidden;
+    position:relative;
+    
+    > div {
+      position:absolute; top:0; left:0;
+      width:100%; height:100%; line-height: @textheight;
+      
+      > .efu-text {
+        color:#fff;
+        margin-top:-0.1em;
+        padding: 0 0 0 14px;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+      }
+      
+      > .efu-hidden {
+        position:absolute; top:@height; left:0;
+        visibility:hidden;
+      }
+    }
+    
+    &.dragover {
+      border-color:#ef761b;
+      border-style:solid;
+      .initAnimation(TranslucentFader, 3s, infinite);
+    }
+    
+    &.efu-lock {
+      .opac(0.22);
+    }
+
+    &.light-theme {
+      background:rgba(255,255,255,0.6);
+      @light-border-color:saturate(#7a8f92,6%);
+      border-color: rgba(red(@light-border-color), green(@light-border-color), blue(@light-border-color), 0.5);
+
+      > div {
+        > .efu-text {
+          color:#575e5f;
+          text-shadow: none;
+        }
+      }
+    }
+  }
+  
+  .edge-file-uploader-view {
+    @lineheight:1.7em;
+
+    > ul {
+      .listless; padding-right:0;
+      line-height: @lineheight;
+      
+      > li {
+        display:block;
+        margin:0.4em 0.2em;
+        margin-left:0;
+        padding:0.3em;
+        border:1px solid darken(#e8eeec, 20%);
+        background-color:#e8eeec;
+        width:100%; //fallback
+        width:fit-content;
+        float:left;
+
+        
+        &:nth-child(2n) {
+          //float:right; margin-right:6px;
+        }
+        
+        > div {
+          padding:3px 5px 3px 0;
+          
+          > .efu-file-filename {
+            display:block; float:left;
+            width:auto; 
+            word-break: break-all;
+            word-wrap: break-word;
+            padding-left:12px;
+            padding-right:20px;
+            overflow:hidden;
+          }
+          
+          > a {
+            display:block; float:left;
+            text-decoration:none;
+            border:1px solid #000;
+            .box-shadow(0,0,2px,#333);
+            background-clip: border-box;
+            color:#fff;
+            padding-left:0.6em;
+            padding-right:0.6em;
+            margin-left:0.3em;
+
+            @basedescol: desaturate(#c82038, 2%);
+            background-color:desaturate(@basedescol, 10%);
+            border-color:darken(desaturate(#c82038, 10%), 15%);
+            
+            .opac(0.7);
+            
+            &:hover {
+              .opac(1);
+              background-color:@basedescol;
+              border-color:darken(#c82038, 15%);
+            }
+          }
+          
+          > * {
+            &:last-child {
+              .clearfix();
+            }
+          }
+        }
+        
+        
+        &.efu-success {
+          @green: #678c25;
+          background:rgba(red(@green),green(@green),blue(@green), 0.8);
+          border-color:darken(@green, 22%);
+          color:#fff;
+        }
+        
+        &.efu-uploading {
+          > div {
+            background-image: url("@{img_path}/indicator-dark.gif");
+            background-position: right center;
+            background-repeat: no-repeat;
+          }
+        }
+      }
+    }
+    
+    > .efu-clearer {
+      .clearfix();
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["example-main.less"],"names":[],"mappings":"AAAA,IACE;EACE,eAAA","file":"/Applications/XAMPP/xamppfiles/htdocs/EdgeJS/examples/css/example-main.css","sourcesContent":["body {\n  #container {\n    font-size: 12px;\n  }\n}\n"]}

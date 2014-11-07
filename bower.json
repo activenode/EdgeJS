@@ -1,0 +1,27 @@
+{
+  "name": "EdgeJS",
+  "version": "0.0.1a",
+  "authors": [
+    "David Lorenz <info@activenode.de>"
+  ],
+  "description": "An amazing JS file uploader",
+  "main": "['./dist/css/*','./dist/js/*']",
+  "keywords": [
+    "uploader",
+    "js"
+  ],
+  "license": "MIT",
+  "homepage": "www.activenode.de",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "1.9.1",
+    "jquery-ui": "~1.11.2"
+  }
+}
