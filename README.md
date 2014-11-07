@@ -15,7 +15,9 @@ Pleas note: Edge.js is **not** a JQuery Plugin as I want to leave the option to 
 supports similar selectors.
 
 ##Documentation
-Well, you are currently looking at it. 
+Well, you are currently looking at it. If you're at the GitHub site right now, go into dist/docs/index.html
+to find the full-fledged documentation.
+
 If you just want to know how to put it on your site then take a look at the `Edge.create(..)` function.
 If you want to get deep into detail (wow, you're a geek) click your way through `Edge.FileUploader`.
 
