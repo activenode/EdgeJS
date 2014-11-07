@@ -12,7 +12,7 @@
   ],
   "license": "MIT",
   "homepage": "www.activenode.de",
-  "private": true,
+  "private": false,
   "ignore": [
     "**/.*",
     "node_modules",
