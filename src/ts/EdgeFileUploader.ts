@@ -704,6 +704,7 @@ module Edge {
                         } else {
                             //MUST be single file. Otherwise it would be very strange having a form without obj.files provided
                             //but multiple files supported
+                            parsed.push(new FileParcel({ "inputField": _inputField, "file": _file }, this.parent));
                         }
                     }
 
