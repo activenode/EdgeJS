@@ -8,7 +8,7 @@
  * Let it be your number one upload module for JavaScript.
  * @version 0.21a
  */
-module Edge {
+module Edge { 
     /**
      * Create a new uploader instance on the webpage with the
      * given configuration.
@@ -24,14 +24,17 @@ module Edge {
      * Abstraction of the browser debug to allow granular control on debugging messages
      * by flag.
      */
-    class Debugger {
-        public static enabled = true;
+    class Debugger { 
+        public static enabled = true; 
 
         public static warn(...args: any[]) {
             if (Debugger.enabled) {
                 console.log('--------WARNING--------------------');
+                
                 for (var i in args) {
                     console.warn(args[i]);
+                    alert(JSON.stringify(args));
+
                 }
                 console.log('-------------------------------');
             }
@@ -163,6 +166,7 @@ module Edge {
             noMultiSync?: boolean; //indicates if (when multiple==true) multiple files are allowed to be uploaded at the SAME time. if this is to true, then files get queued
             listRenderView?: JQElem; //if given this will be the holder for any upload indication and action
             processors: IFileUploaderProcessors;
+            receiverZIndex?: number;
         }
 
         class Helper {
@@ -571,8 +575,12 @@ module Edge {
                     parentForm.submit();
                     this.correspondingIframe = Helper.f('#'+parentForm.prop('target'));
                     this.correspondingIframe.on('load', function(e) {
-                        var doc = this.contentDocument || this.contentWindow.document;
-                        onAfterServerResponse(self_ref, doc.documentElement.innerHTML);
+                        if (Helper.f.trim(Helper.f(this).html()) == '') {
+                            onAfterServerResponse(self_ref, false);
+                        } else {
+                            var doc = this.contentDocument || this.contentWindow.document;
+                            onAfterServerResponse(self_ref, doc.documentElement.innerHTML);
+                        }
                     });
                 } else {
                     var formData = new FormData();
@@ -675,10 +683,11 @@ module Edge {
                             parsed.push(new FileParcel({"inputField": _inputField,	"file": _file}, this.parent));
                         }
                     } else {
+                        console.log(JSON.stringify(_inputField[0]));
                         //is in form! check if there are multiple file-inputs and IF YES then link the FileParcels
 
 
-                        if (_inputField[0].files || _inputField[0].files.length>0) {
+                        if (_inputField[0].files && _inputField[0].files.length>0) {
                             //if for whatever reason the fileappi-support is not given but the .files
                             //does exist (note: this should only happen when forced to programmatically)
                             //then we work on that
@@ -766,7 +775,7 @@ module Edge {
                     UploadManager.warn("The given receiver contains more than one element. Only the first element will be used");
                 }
 
-                config.receiver.addClass('edge-file-uploader').html('<div>'
+                config.receiver.addClass('edge-file-uploader').html('<div class="efu-wrapper">'
                 +'<div class="efu-hidden"></div>'
                 +'<div class="efu-text">'+Localization.__t['uploadFile']+'</div>'
                 +'</div>');
@@ -780,13 +789,17 @@ module Edge {
                 var appendingParent:JQElem;
                 var addZIndex:number = -1;
 
-                if (this.autoUploadEnabled && !this.config.stayInContext) {
+                //when autoUpload is enabled AND stayInContext is not enforced
+                //then > when the container is already inside a form, drag it out at its correct position //xfx
+                
+                
+                if (this.autoUploadEnabled && !this.config.stayInContext && config.receiver.closest('form').length!==0) {
                     //autoUpload is wanted. If its a browser without fileApi then this is a problem
                     //when the uploader is inside of a form because we would need to add another form
                     //for the auto-upload and this would result in a <form> element inside a <form> element.
                     //that is why we add it at the end of the body and position it accordingly.
                     appendingParent = config.receiver.closest('body');
-                    addZIndex = config.receiver.zIndex();
+                    addZIndex = config.receiverZIndex;
                 } else {
                     //in this case the element has to be inside a form anyway so we can add it directly inside
                     appendingParent = config.receiver;
@@ -796,7 +809,9 @@ module Edge {
 
                 if (addZIndex>0) {
                     this.filesElem.css('z-index', ''+addZIndex);
-                    this.listenForResize();
+                    this.listenForResize(true);
+                } else {
+                    this.listenForResize(false);
                 }
 
 
@@ -1051,22 +1066,26 @@ module Edge {
             }
 
 
-            private listenForResize() {
+            private listenForResize(bReposition?: boolean) {
                 var self_ref: UploadManager = this;
 
                 var repos:Function = function(){
                     var coords: ICoords = self_ref.referenceParent.offset();
                     var width: number = self_ref.referenceParent.width();
                     var height: number = self_ref.referenceParent.height();
-
+                    
                     self_ref.filesElem
-                        .css('top', coords.top+'px')
-                        .css('left', coords.left+'px')
                         .css('width', width+'px')
                         .css('height', height+'px');
+                
+                    if (bReposition) {
+                        self_ref.filesElem
+                            .css('top', coords.top+'px')
+                            .css('left', coords.left+'px');
+                    }
                 };
 
-                Helper.f(window).on('resize.efuResizeListener', repos);
+                Helper.f(window).off('resize.efuResizeListener').on('resize.efuResizeListener', repos);
                 repos();
             }
 
@@ -1166,6 +1185,7 @@ module Edge {
                     var baseElem:JQElem = uploaderRef.referenceParent.parent().removeClass('dragover');
                     var fileAction: FileAction = new FileAction(Helper.f(this),e,uploaderRef);
 
+                    
                     try {
                         if (fileAction.containsDirectories()) {
                             //cannot work with that. just delete and add another one
@@ -1175,6 +1195,7 @@ module Edge {
                             //at least no directory
                             var fileParcels: FileParcel[] = fileAction.parse();
                             Debugger.log(fileParcels);
+                            
 
                             if (fileParcels.length > 1 && !uploaderRef.multiUploadEnabled) {
                                 fileParcels = [fileParcels[0]];
