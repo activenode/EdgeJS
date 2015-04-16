@@ -24,8 +24,11 @@ If you want to get deep into detail (wow, you're a geek) click your way through 
 ##Examples
 ### Simple Multiuploadenabled uploader
 **HTML**
-    <div id="uploader"></div>
+
+`<div id="uploader"></div>`
+    
 **JS**
+
     <script>
     Edge.create({
       receiver: '#uploader',
