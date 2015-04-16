@@ -19,42 +19,55 @@ body .efu-files {
   -moz-opacity: 0;
   filter: alpha(opacity=0);
 }
-body .efu-files > .efu-file-entry {
+body .efu-files .efu-file-entry {
   display: none;
+  width: 100%;
+  height: 100%;
 }
-body .efu-files > .efu-file-entry:first-child {
+body .efu-files .efu-file-entry:first-child {
   display: block;
 }
+body .efu-files .efu-file-entry fieldset {
+  width: 100%;
+  height: 100%;
+}
 body .efu-files input[type=file] {
-  font-size: 50px;
+  font-size: 200px;
   cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
 }
 body .edge-file-uploader {
   line-height: 2.7em;
   border: 2px solid #545656;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   width: 100%;
   height: 2.7em;
-  background: rgba(92, 103, 104, 0.9);
+  background-color: #333;
   overflow: hidden;
   position: relative;
 }
-body .edge-file-uploader > div {
+body .edge-file-uploader .efu-wrapper {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 2.7em;
   line-height: -5.3em;
+  overflow: hidden;
 }
-body .edge-file-uploader > div > .efu-text {
+body .edge-file-uploader .efu-wrapper .efu-text {
   color: #fff;
   margin-top: -0.1em;
   padding: 0 0 0 14px;
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
 }
-body .edge-file-uploader > div > .efu-hidden {
+body .edge-file-uploader .efu-wrapper .efu-hidden {
   position: absolute;
   top: 2.7em;
   left: 0;
@@ -63,16 +76,13 @@ body .edge-file-uploader > div > .efu-hidden {
 body .edge-file-uploader.dragover {
   border-color: #ef761b;
   border-style: solid;
-  -webkit-animation-name: TranslucentFader;
-          animation-name: TranslucentFader;
-  -webkit-animation-duration: 3s;
-          animation-duration: 3s;
+  animation-name: TranslucentFader;
+  animation-duration: 3s;
   -webkit-animation-name: TranslucentFader;
   -webkit-animation-duration: 3s;
   -ms-animation-name: TranslucentFader;
   -ms-animation-duration: 3s;
-  -webkit-animation-iteration-count: infinite;
-          animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
 }
 body .edge-file-uploader.efu-lock {
   opacity: 0.22;
@@ -107,8 +117,6 @@ body .edge-file-uploader-view > ul > li {
   border: 1px solid #adc3bc;
   background-color: #e8eeec;
   width: 100%;
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
   width: fit-content;
   float: left;
 }
