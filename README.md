@@ -21,5 +21,18 @@ to find the full-fledged documentation.
 If you just want to know how to put it on your site then take a look at the `Edge.create(..)` function.
 If you want to get deep into detail (wow, you're a geek) click your way through `Edge.FileUploader`.
 
-##Demos
-In process...
+##Examples
+### Simple Multiuploadenabled uploader
+**HTML**
+    <div id="uploader"></div>
+**JS**
+    <script>
+    Edge.create({
+      receiver: '#uploader',
+      fileName: 'file',
+      multiUpload: true,
+      processors: {
+        //any type of callback functions go here
+      }
+    });
+    </script>
