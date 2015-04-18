@@ -39,3 +39,13 @@ If you want to get deep into detail (wow, you're a geek) click your way through 
       }
     });
     </script>
+
+
+**Server**
+
+Your server needs to tell the Uploader which Files have been uploaded so that syncing between Frontend and Backend works like a charm.
+
+Every Serverrequest will send `domUploadIds` as variable to the server. 
+
+Any response must be in the format `{success: [boolean], files: [{'domUploadId'=>'uploadidgiven_1'},{'domUploadId'=>'uploadidgiven_2'}]}`
+
