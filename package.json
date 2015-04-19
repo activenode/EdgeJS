@@ -1,0 +1,28 @@
+{
+  "name": "EdgeJS",
+  "version": "0.22.0-0",
+  "description": "A cross-browser (IE9+) solution for file-uploads including dragndrop",
+  "main": "gulpfile.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/activenode/EdgeJS.git"
+  },
+  "author": "David Lorenz (http://activenode.de)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/activenode/EdgeJS/issues"
+  },
+  "homepage": "https://github.com/activenode/EdgeJS",
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-less": "^3.0.2",
+    "gulp-rename": "^1.2.2",
+    "gulp-typescript": "^2.6.0"
+  }
+}
