@@ -11,7 +11,7 @@ interface Error {
  * Inside a form, with auto-upload, without auto-upload, outside a form, etc.
  * It is a multi-browser solution and it is fully customizable to fit your needs.
  * Let it be your number one upload module for JavaScript.
- * @version 0.22
+ * @version 0.3.0-0
  */
 module Edge { 
     /**
