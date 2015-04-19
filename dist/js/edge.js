@@ -25,47 +25,54 @@ var Edge;
     var Debugger = (function () {
         function Debugger() {
         }
-        Debugger.warn = function () {
+        Debugger.warn = function (errorObj) {
             var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
             }
             if (Debugger.enabled) {
                 console.log('--------WARNING--------------------');
                 for (var i in args) {
                     console.warn(args[i]);
-                    alert(JSON.stringify(args));
                 }
-                console.log('-------------------------------');
+                if (Debugger.showTrace.warn) {
+                    console.log(errorObj.stack.replace('Error', 'WarnStack'));
+                }
             }
         };
-        Debugger.error = function () {
+        Debugger.error = function (errorObj) {
             var _error = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                _error[_i - 0] = arguments[_i];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                _error[_i - 1] = arguments[_i];
             }
             if (Debugger.enabled) {
                 console.log('--------ERROR--------------------');
                 for (var i in _error) {
                     console.error(_error[i]);
                 }
-                console.log('-------------------------------');
+                console.error(errorObj.stack);
             }
         };
-        Debugger.log = function () {
+        Debugger.log = function (errorObj) {
             var msg = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                msg[_i - 0] = arguments[_i];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                msg[_i - 1] = arguments[_i];
             }
             if (Debugger.enabled) {
                 console.log('--------LOG--------------------');
                 for (var i in msg) {
                     console.log(msg[i]);
                 }
-                console.log('-------------------------------');
+                if (Debugger.showTrace.log) {
+                    console.log(errorObj.stack.replace('Error', 'LogStack'));
+                }
             }
         };
         Debugger.enabled = true;
+        Debugger.showTrace = {
+            warn: true,
+            log: false
+        };
         return Debugger;
     })();
     /**
@@ -94,7 +101,8 @@ var Edge;
                 directoryUploadError: 'Directories cannot be read. Please input the files directly.',
                 userError: 'Ouch. An unknown error occured.',
                 serverError: 'An error occured while upload the file.',
-                actionDeleteFile: 'Delete'
+                actionDeleteFile: 'Delete',
+                fileNotReadableError: 'File could not be read!'
             };
             return Localization;
         })();
@@ -106,6 +114,7 @@ var Edge;
             Errors.DIRECTORY_UPLOAD = { errorCode: 3, localKey: 'directoryUploadError' };
             Errors.USER_ERROR = { errorCode: 4, localKey: 'userError' };
             Errors.SERVER_INVALID_RESPONSE = { errorCode: 5, localKey: 'serverError' };
+            Errors.FILE_NOT_READABLE = { errorCode: 6, localKey: 'fileNotReadableError' };
             return Errors;
         })();
         var Helper = (function () {
@@ -124,7 +133,7 @@ var Edge;
             };
             Helper.addToStringList = function (currentStr, toAdd) {
                 if ((typeof toAdd).toLowerCase() !== 'string') {
-                    Debugger.error('Non-string type parameter cannot be added to a string list');
+                    Debugger.error(new Error, 'Non-string type parameter cannot be added to a string list');
                     return currentStr;
                 }
                 else {
@@ -181,7 +190,7 @@ var Edge;
                 this.linkedChildren = [];
                 if (container.file === null) {
                     //its an element
-                    Debugger.log('FileParcel is created with ELEMENT (probably no FileAPI)');
+                    Debugger.log(new Error, 'FileParcel is created with ELEMENT (probably no FileAPI)');
                     if (container.filename) {
                         //if filename is already provided, then take it!
                         this.filename = container.filename;
@@ -193,7 +202,7 @@ var Edge;
                 }
                 else {
                     //its a real file
-                    Debugger.log('FileParcel is created with EVENT (FileAPI)', container.file);
+                    Debugger.log(new Error, 'FileParcel is created with EVENT (FileAPI)', container.file);
                     this.file = container.file;
                     this.filename = FileParcel.fileBasename(this.file.name);
                     this.type = this.file.type;
@@ -305,7 +314,7 @@ var Edge;
                         return this.serverSaveData[serverKey];
                     }
                     else {
-                        Debugger.warn('You are accessing a variable that is not existent in here in serverSaveData-Object.');
+                        Debugger.warn(new Error, 'You are accessing a variable that is not existent in here in serverSaveData-Object.');
                         return null;
                     }
                 }
@@ -341,7 +350,7 @@ var Edge;
                     }
                 }
                 else {
-                    Debugger.warn('Server did not provide any file information in the JSON-Response.');
+                    Debugger.warn(new Error, 'Server did not provide any file information in the JSON-Response.');
                 }
                 if (!this.isLinked && this.linkedChildren.length > 0) {
                     for (var i = 0; i < this.linkedChildren.length; i++) {
@@ -363,17 +372,41 @@ var Edge;
                 else {
                     var self_ref = this;
                     var reader = new FileReader();
-                    reader.onload = function (response) {
-                        var rawData = response.target.result;
-                        self_ref.setBinaryFile(rawData);
-                        var dataUrlReader = new FileReader();
-                        dataUrlReader.onload = function (response) {
-                            self_ref.setDataUrl(response.target.result);
-                            callback(self_ref);
+                    try {
+                        reader.onload = function (response) {
+                            Debugger.log(new Error, 'Reading binaries of file', self_ref.getFilename());
+                            var hasRangeError = false;
+                            try {
+                                var rawData = response.target.result;
+                                self_ref.setBinaryFile(rawData);
+                            }
+                            catch (binaryReadError) {
+                                if (binaryReadError.name == 'RangeError') {
+                                    hasRangeError = true;
+                                }
+                                Debugger.warn(new Error, binaryReadError, 'Was not capable of reading file binary. Binary-getter will not be available. This can happen with very big files!');
+                                delete self_ref.getBinaryFile;
+                            }
+                            if (!hasRangeError) {
+                                var dataUrlReader = new FileReader();
+                                dataUrlReader.onload = function (response) {
+                                    self_ref.setDataUrl(response.target.result);
+                                    callback(self_ref);
+                                };
+                                dataUrlReader.readAsDataURL(self_ref.file);
+                            }
+                            else {
+                                Debugger.warn(new Error, 'As there was already a RangeError when reading binaries, reading DataUrl will be skipped! DataUrlGetter will not be available.');
+                                delete self_ref.getDataUrl;
+                                callback(self_ref);
+                            }
                         };
-                        dataUrlReader.readAsDataURL(self_ref.file);
-                    };
-                    reader.readAsBinaryString(this.file);
+                        reader.readAsBinaryString(this.file);
+                    }
+                    catch (e) {
+                        self_ref.uploadManager._onError(Errors.FILE_NOT_READABLE);
+                        Debugger.error(new Error, e);
+                    }
                 }
             };
             FileParcel.prototype.isVirtual = function () {
@@ -424,7 +457,7 @@ var Edge;
                     var fileInputFieldElem = parentForm.find('input[type=file]');
                     fileInputFieldElem.siblings('input[type=hidden]').remove();
                     fileInputFieldElem.after('<input type="hidden" name="domUploadIds[]" value="' + this.getDomUploadId() + '" />');
-                    Debugger.log('Activator: ' + this.getDomUploadId() + ' >>> ' + this.filename);
+                    Debugger.log(new Error, 'Activator: ' + this.getDomUploadId() + ' >>> ' + this.filename);
                     //now add ids of linked children:
                     if (this.linkedChildren && this.linkedChildren.length > 0) {
                         for (var l = 0; l < this.linkedChildren.length; l++) {
@@ -435,13 +468,14 @@ var Edge;
                     parentForm.submit();
                     this.correspondingIframe = Helper.f('#' + parentForm.prop('target'));
                     this.correspondingIframe.on('load', function (e) {
-                        if (Helper.f.trim(Helper.f(this).html()) == '') {
-                            onAfterServerResponse(self_ref, false);
+                        var serverResponse = '{"success":false, "additionalData": "No response was read"}';
+                        try {
+                            var doc = (this.contentDocument || this.contentWindow.document).documentElement.innerHTML;
+                            serverResponse = doc; //dont directly assign serverResponse to allow the error to be first
                         }
-                        else {
-                            var doc = this.contentDocument || this.contentWindow.document;
-                            onAfterServerResponse(self_ref, doc.documentElement.innerHTML);
+                        catch (e) {
                         }
+                        onAfterServerResponse(self_ref, serverResponse);
                     });
                 }
                 else {
@@ -487,7 +521,7 @@ var Edge;
                 if (this.uploadXhr) {
                     console.log(this.uploadXhr.abort());
                 }
-                Debugger.log('Destroy called on: ' + this.filename);
+                Debugger.log(new Error, 'Destroy called on: ' + this.filename);
                 this.uploadManager.removeActiveParcel(this);
             };
             /**
@@ -575,10 +609,9 @@ var Edge;
         var UploadManager = (function () {
             function UploadManager(config) {
                 this.config = config;
-                //--------------------------------
                 this.fileSafe = [];
                 if (!this.isValidConfig(config)) {
-                    Debugger.error('Invalid config. Not initiating Uploader!');
+                    Debugger.error(new Error, 'Invalid config. Not initiating Uploader!');
                     return this;
                 }
                 this.filenameString = config.fileName;
@@ -588,13 +621,12 @@ var Edge;
                 if (Helper.isString(config.receiver)) {
                     config.receiver = Helper.f(config.receiver);
                     if (config.receiver.length === 0) {
-                        UploadManager.error("No Element but string was given. Trying to use the string as selector failed");
-                        throw 'The given receiver string did not match any dom object';
+                        Debugger.error(new Error, 'UploadManager', 'The given receiver string did not match any dom object');
                         return;
                     }
                 }
                 if (config.receiver.length > 1) {
-                    UploadManager.warn("The given receiver contains more than one element. Only the first element will be used");
+                    Debugger.warn(new Error, "The given receiver contains more than one element. Only the first element will be used");
                 }
                 config.receiver.addClass('edge-file-uploader').html('<div class="efu-wrapper">' + '<div class="efu-hidden"></div>' + '<div class="efu-text">' + Localization.__t['uploadFile'] + '</div>' + '</div>');
                 this.referenceParent = config.receiver.children('div').first();
@@ -632,14 +664,8 @@ var Edge;
                 this.pushFile();
                 this.processViews(); //initial view-refresh :)
             }
-            UploadManager.error = function (errMsg) {
-                Debugger.error('UploadManager: ' + errMsg);
-            };
-            UploadManager.warn = function (errMsg) {
-                Debugger.warn('UploadManager: ' + errMsg);
-            };
             UploadManager.prototype.processAndRender = function () {
-                Debugger.log('wants to process and render');
+                Debugger.log(new Error, 'processAndRender()');
                 var processingResult = this.process();
                 this.processViews();
                 return processingResult;
@@ -675,6 +701,9 @@ var Edge;
                                     if (responseType !== 'object') {
                                         var strippedTags = serverResponse.replace(/(<([^>]+)>)/ig, "");
                                         serverResponse = JSON.parse(strippedTags);
+                                    }
+                                    if (typeof self_ref.config.mapServerResponse == 'function') {
+                                        serverResponse = self_ref.config.mapServerResponse(serverResponse);
                                     }
                                     if (serverResponse.success && serverResponse.success === true) {
                                         file.markUploadSuccess(serverResponse);
@@ -731,7 +760,7 @@ var Edge;
                 }
                 else {
                     var _ul = Helper.f('<ul></ul>');
-                    Debugger.log('NEW RENDER');
+                    Debugger.log(new Error, 'processViews() / RENDER');
                     for (var i = 0; i < this.fileSafe.length; i++) {
                         var liEntry = Helper.f('<li data-domuploadid="' + this.fileSafe[i].getDomUploadId() + '"></li>');
                         liEntry.append('<div></div>');
@@ -772,7 +801,7 @@ var Edge;
                     }
                 }
                 if (this.config.idHolderInput) {
-                    Debugger.log('idReceiver is given');
+                    Debugger.log(new Error, 'idReceiver is given');
                     try {
                         var id = file.getServerData('id');
                         if (!id) {
@@ -781,8 +810,7 @@ var Edge;
                         this.config.idHolderInput.val(Helper.addToStringList(this.config.idHolderInput.val(), id));
                     }
                     catch (e) {
-                        Debugger.warn('It was not possible to read the [id]-Parameter of this file although a idHolderInput was provided (wanted to add an id)');
-                        Debugger.log(file);
+                        Debugger.warn(new Error, 'It was not possible to read the [id]-Parameter of this file although a idHolderInput was provided (wanted to add an id)', file);
                     }
                 }
                 if (this.config.processors.onFileUploaded) {
@@ -827,7 +855,7 @@ var Edge;
                     this.config.processors.onError(localizedMessage, error);
                 }
                 else {
-                    UploadManager.error(error.localKey);
+                    Debugger.error(new Error, error.localKey);
                     alert(localizedMessage);
                 }
             };
@@ -850,12 +878,12 @@ var Edge;
             };
             UploadManager.prototype.isValidConfig = function (config) {
                 if (typeof config.fileName == 'undefined') {
-                    UploadManager.error('fileName is missing but required');
+                    Debugger.error(new Error, 'fileName is missing but required');
                     return false;
                 }
                 else if (this.config.autoUpload && this.config.autoUpload.enable === true) {
                     if (!this.config.autoUpload.url) {
-                        UploadManager.error('Auto-Upload is enabled but the Upload-URL is missing in the configuration');
+                        Debugger.error(new Error, 'Auto-Upload is enabled but the Upload-URL is missing in the configuration');
                         return false;
                     }
                 }
@@ -873,7 +901,7 @@ var Edge;
                         this.config.processors.onBeforeDeleteUploaded(p, this);
                     }
                 }
-                Debugger.log('DEL::', p);
+                Debugger.log(new Error, 'DEL::FileParcel', p);
                 for (var i = 0; i < this.fileSafe.length; i++) {
                     if (p.getDomUploadId() === this.fileSafe[i].getDomUploadId()) {
                         continue;
@@ -893,7 +921,7 @@ var Edge;
                             this.config.idHolderInput.val(Helper.removeFromStringList(this.config.idHolderInput.val(), id));
                         }
                         catch (e) {
-                            Debugger.warn('It was not possible to read the [id]-Parameter of this file although a idHolderInput was provided (wanted to remove an id)');
+                            Debugger.warn(new Error, 'It was not possible to read the [id]-Parameter of this file although a idHolderInput was provided (wanted to remove an id)');
                         }
                     }
                 }
@@ -934,7 +962,7 @@ var Edge;
                         else {
                             //at least no directory
                             var fileParcels = fileAction.parse();
-                            Debugger.log(fileParcels);
+                            Debugger.log(new Error, fileParcels);
                             if (fileParcels.length > 1 && !uploaderRef.multiUploadEnabled) {
                                 fileParcels = [fileParcels[0]];
                             }
@@ -975,7 +1003,7 @@ var Edge;
                         }
                     }
                     catch (err) {
-                        UploadManager.warn(err);
+                        Debugger.warn(new Error, err);
                         if (_form !== null) {
                             if (_form.attr('target')) {
                                 //now also removing the iframe it would have lead to
@@ -1011,7 +1039,7 @@ var Edge;
             };
             UploadManager.prototype.submissionFinalizer = function () {
                 if (!this.autoUploadEnabled) {
-                    Debugger.error('submissionFinalizer cannot be called when autoUpload was enabled');
+                    Debugger.error(new Error, 'submissionFinalizer cannot be called when autoUpload was enabled');
                     throw 'Breaking execution...';
                 }
                 else {
